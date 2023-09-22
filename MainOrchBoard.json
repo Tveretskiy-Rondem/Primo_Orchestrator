@@ -1070,8 +1070,7 @@
                 "match": "null",
                 "result": {
                   "color": "yellow",
-                  "index": 2,
-                  "text": "Не закончил"
+                  "index": 2
                 }
               },
               "type": "special"
@@ -1230,6 +1229,37 @@
               {
                 "id": "custom.width",
                 "value": 118
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assignment"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Manual"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Не закончил"
               }
             ]
           }
@@ -2033,13 +2063,13 @@
     "list": []
   },
   "time": {
-    "from": "now-12h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Orchestrator",
   "uid": "YpEtaXEVz",
-  "version": 59,
+  "version": 60,
   "weekStart": ""
 }
