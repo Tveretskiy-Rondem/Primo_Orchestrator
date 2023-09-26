@@ -60,6 +60,12 @@
       "id": "table",
       "name": "Table",
       "version": ""
+    },
+    {
+      "type": "panel",
+      "id": "timeseries",
+      "name": "Time series",
+      "version": ""
     }
   ],
   "annotations": {
@@ -774,6 +780,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
+          "noValue": "Все запуски были успешны или еще не завершились",
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -908,11 +915,41 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "continuous-GrYlRd"
+            "mode": "continuous-GrYlRd",
+            "seriesBy": "last"
           },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 0,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepBefore",
+            "lineWidth": 6,
+            "pointSize": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
           "mappings": [],
-          "max": 900,
-          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -922,7 +959,7 @@
               }
             ]
           },
-          "unit": "s"
+          "unit": "none"
         },
         "overrides": []
       },
@@ -932,20 +969,19 @@
         "x": 0,
         "y": 16
       },
-      "id": 17,
+      "id": 33,
       "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
         },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": false
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
       },
-      "pluginVersion": "9.4.7",
       "targets": [
         {
           "datasource": {
@@ -955,7 +991,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\",\n(\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours')",
+          "rawSql": "SELECT (\"SA\" - interval '3 hours') AS \"SA\", (SELECT COUNT(*) FROM public.\"RpaProjectLaunches\" WHERE \"SA\" BETWEEN \"StartedAt\" AND \"CompletedAt\") AS \"Workers\"\nFROM (SELECT \"StartedAt\" AS \"SA\", \"StartedAt\", \"CompletedAt\" FROM public.\"RpaProjectLaunches\" WHERE \"CompletedAt\" IS NOT null) AS \"Completed\"\nWHERE $__timeFilter(\"SA\" - interval '3 hours')\nGROUP BY \"SA\"\nORDER BY \"SA\" DESC",
           "refId": "A",
           "sql": {
             "columns": [
@@ -976,60 +1012,8 @@
           }
         }
       ],
-      "title": "Среднее время выполнения по проектам",
-      "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": true
-                  }
-                },
-                "fieldName": "Disabled"
-              }
-            ],
-            "match": "any",
-            "type": "exclude"
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Disabled": true
-            },
-            "indexByName": {},
-            "renameByName": {
-              "Disabled": "",
-              "Duration": "",
-              "time": ""
-            }
-          }
-        },
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "Project"
-            ]
-          }
-        },
-        {
-          "id": "reduce",
-          "options": {
-            "includeTimeField": false,
-            "mode": "reduceFields",
-            "reducers": [
-              "mean"
-            ]
-          }
-        }
-      ],
-      "type": "gauge"
+      "title": "Количество одновременно работающих роботов",
+      "type": "timeseries"
     },
     {
       "datasource": {
@@ -1295,7 +1279,7 @@
           "editorMode": "code",
           "format": "table",
           "rawQuery": true,
-          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS startedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
+          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS StartedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1328,224 +1312,11 @@
       "fieldConfig": {
         "defaults": {
           "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            }
-          },
-          "mappings": []
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "New"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "All"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Readed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Deleted"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 0,
-        "y": 24
-      },
-      "id": 21,
-      "options": {
-        "displayLabels": [],
-        "legend": {
-          "displayMode": "table",
-          "placement": "right",
-          "showLegend": true,
-          "values": [
-            "value",
-            "percent"
-          ]
-        },
-        "pieType": "pie",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT (*) AS \"Deleted\" FROM \"ExchangeQueueValues\"\nWHERE \"ExchangeQueueId\" = (\n  SELECT \"ExchangeQueueId\" FROM \"ExchangeQueues\"\n  WHERE \"Name\" = 'Queue1'\n) \nAND \"DeletedAt\" IS NOT null\n",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        },
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "hide": false,
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT (*) AS \"New\" FROM \"ExchangeQueueValues\"\nWHERE \"ExchangeQueueId\" = (\n  SELECT \"ExchangeQueueId\" FROM \"ExchangeQueues\"\n  WHERE \"Name\" = 'Queue1'\n) \nAND \"DeletedAt\" IS null\nAND \"LastEventId\" IS null\n",
-          "refId": "B",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        },
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "hide": false,
-          "rawQuery": true,
-          "rawSql": "SELECT COUNT (*) AS \"Readed\" FROM \"ExchangeQueueValues\"\nWHERE \"ExchangeQueueId\" = (\n  SELECT \"ExchangeQueueId\" FROM \"ExchangeQueues\"\n  WHERE \"Name\" = 'Queue1'\n) \nAND \"DeletedAt\" IS null\nAND \"LastEventId\" IS NOT null\n",
-          "refId": "C",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Очередь Queue1",
-      "type": "piechart"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_LTOOLS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "fixed"
-          },
-          "custom": {
-            "align": "center",
-            "cellOptions": {
-              "type": "color-text"
-            },
-            "filterable": false,
-            "inspect": false,
-            "minWidth": 200,
-            "width": 300
+            "mode": "continuous-GrYlRd"
           },
           "mappings": [],
-          "noValue": "0",
+          "max": 900,
+          "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
@@ -1554,164 +1325,29 @@
                 "value": null
               }
             ]
-          }
+          },
+          "unit": "s"
         },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "New"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Readed"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Deleted"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Total"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 70
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Name"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 110
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "New"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "green",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Readed"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "yellow",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Deleted"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "red",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Name"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "text",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Total"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "continuous-BlPu"
-                }
-              }
-            ]
-          }
-        ]
+        "overrides": []
       },
       "gridPos": {
         "h": 8,
-        "w": 6,
-        "x": 6,
+        "w": 12,
+        "x": 0,
         "y": 24
       },
-      "id": 29,
+      "id": 17,
       "options": {
-        "footer": {
-          "countRows": false,
-          "enablePagination": false,
-          "fields": [],
-          "reducer": [
-            "sum"
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
           ],
-          "show": false
+          "fields": "",
+          "values": false
         },
-        "showHeader": true,
-        "sortBy": []
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
       },
       "pluginVersion": "9.4.7",
       "targets": [
@@ -1722,38 +1358,8 @@
           },
           "editorMode": "code",
           "format": "table",
-          "hide": false,
           "rawQuery": true,
-          "rawSql": "SELECT \"ExchangeQueueId\", COUNT (\"ExchangeQueueId\") AS \"New\"\nFROM \"ExchangeQueueValues\"\nWHERE \"LastEventId\" IS NULL AND \"DeletedAt\" IS NULL\nGROUP BY \"ExchangeQueueId\"",
-          "refId": "C",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        },
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "hide": false,
-          "rawQuery": true,
-          "rawSql": "SELECT \"ExchangeQueueId\", COUNT (\"ExchangeQueueId\") AS \"Readed\"\nFROM \"ExchangeQueueValues\"\nWHERE \"LastEventId\" IS NOT NULL AND \"DeletedAt\" IS NULL\nGROUP BY \"ExchangeQueueId\"",
+          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\",\n(\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours')",
           "refId": "A",
           "sql": {
             "columns": [
@@ -1772,106 +1378,62 @@
             ],
             "limit": 50
           }
-        },
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "hide": false,
-          "rawQuery": true,
-          "rawSql": "SELECT \"ExchangeQueueId\", COUNT (\"ExchangeQueueId\") AS \"Deleted\"\nFROM \"ExchangeQueueValues\"\nWHERE \"LastEventId\" IS NOT NULL AND \"DeletedAt\" IS NOT NULL\nGROUP BY \"ExchangeQueueId\"",
-          "refId": "B",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        },
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "hide": false,
-          "rawQuery": true,
-          "rawSql": "SELECT \"Name\", \"Id\" AS \"ExchangeQueueId\"\nFROM \"ExchangeQueues\"\n--GROUP BY \"Name\"",
-          "refId": "D",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
         }
       ],
-      "title": "Очереди",
+      "title": "Среднее время выполнения по проектам",
       "transformations": [
         {
-          "id": "joinByField",
+          "id": "filterByValue",
           "options": {
-            "byField": "ExchangeQueueId",
-            "mode": "outer"
-          }
-        },
-        {
-          "disabled": true,
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "Name"
-            ]
+            "filters": [
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": true
+                  }
+                },
+                "fieldName": "Disabled"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
           }
         },
         {
           "id": "organize",
           "options": {
             "excludeByName": {
-              "ExchangeQueueId": true
+              "Disabled": true
             },
-            "indexByName": {
-              "Deleted": 4,
-              "ExchangeQueueId": 0,
-              "Name": 1,
-              "New": 2,
-              "Readed": 3
-            },
-            "renameByName": {}
+            "indexByName": {},
+            "renameByName": {
+              "Disabled": "",
+              "Duration": "",
+              "time": ""
+            }
           }
         },
         {
-          "id": "calculateField",
-          "options": {}
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "Project"
+            ]
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "mean"
+            ]
+          }
         }
       ],
-      "type": "table"
+      "type": "gauge"
     },
     {
       "datasource": {
@@ -1960,7 +1522,7 @@
           }
         }
       ],
-      "title": "Orch Logs",
+      "title": "Количество записей в Logs",
       "type": "gauge"
     },
     {
@@ -2050,7 +1612,7 @@
           }
         }
       ],
-      "title": "Orch Events",
+      "title": "Количество записей в OrchEvents",
       "type": "gauge"
     }
   ],
@@ -2063,13 +1625,13 @@
     "list": []
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Orchestrator",
   "uid": "YpEtaXEVz",
-  "version": 60,
+  "version": 63,
   "weekStart": ""
 }
