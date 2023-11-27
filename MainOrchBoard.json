@@ -1446,7 +1446,7 @@
             "mode": "thresholds"
           },
           "mappings": [],
-          "max": 10000000,
+          "max": 6000000,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
@@ -1457,15 +1457,15 @@
               },
               {
                 "color": "green",
-                "value": 1000000
+                "value": 0
               },
               {
                 "color": "#EAB839",
-                "value": 5000000
+                "value": 2000000
               },
               {
                 "color": "red",
-                "value": 7000000
+                "value": 4000000
               }
             ]
           }
@@ -1536,26 +1536,26 @@
             "mode": "thresholds"
           },
           "mappings": [],
-          "max": 300000,
+          "max": 3000000,
           "min": 0,
           "thresholds": {
             "mode": "absolute",
             "steps": [
               {
-                "color": "blue",
+                "color": "green",
                 "value": null
               },
               {
                 "color": "green",
-                "value": 20000
+                "value": 0
               },
               {
                 "color": "#EAB839",
-                "value": 100000
+                "value": 1000000
               },
               {
                 "color": "red",
-                "value": 200000
+                "value": 2000000
               }
             ]
           }
@@ -1625,13 +1625,13 @@
     "list": []
   },
   "time": {
-    "from": "now-6h",
+    "from": "now-3h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Orchestrator",
   "uid": "YpEtaXEVz",
-  "version": 63,
+  "version": 64,
   "weekStart": ""
 }
