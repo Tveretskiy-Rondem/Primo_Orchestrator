@@ -253,6 +253,868 @@
       "fieldConfig": {
         "defaults": {
           "color": {
+            "fixedColor": "blue",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "blue",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dthms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Не закончил": {
+                        "index": 0,
+                        "text": "-"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assignment"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Manual"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Не закончил"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 35,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS StartedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Общее время работы по роботам",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Duration": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Robot": {
+                "aggregations": [],
+                "operation": "groupby"
+              }
+            }
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "palette-classic"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 8
+      },
+      "id": 16,
+      "options": {
+        "barRadius": 0.15,
+        "barWidth": 0.69,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "normal",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 200
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\",\n(\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours')",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Время выполнения по проектам",
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": true
+                  }
+                },
+                "fieldName": "Disabled"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Disabled": true,
+              "Duration": false
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Disabled": "",
+              "Duration": "",
+              "time": ""
+            }
+          }
+        },
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "Project"
+            ]
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "purple",
+            "mode": "fixed"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "fillOpacity": 80,
+            "gradientMode": "none",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineWidth": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dthms"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 8
+      },
+      "id": 36,
+      "options": {
+        "barRadius": 0,
+        "barWidth": 0.97,
+        "fullHighlight": false,
+        "groupWidth": 0.7,
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": true
+        },
+        "orientation": "auto",
+        "showValue": "auto",
+        "stacking": "none",
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        },
+        "xTickLabelRotation": 0,
+        "xTickLabelSpacing": 0
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS StartedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Общее время работы по проектам",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Duration": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Project": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Robot": {
+                "aggregations": []
+              }
+            }
+          }
+        }
+      ],
+      "type": "barchart"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd",
+            "seriesBy": "last"
+          },
+          "custom": {
+            "axisCenteredZero": false,
+            "axisColorMode": "text",
+            "axisLabel": "",
+            "axisPlacement": "auto",
+            "barAlignment": 0,
+            "drawStyle": "bars",
+            "fillOpacity": 0,
+            "gradientMode": "scheme",
+            "hideFrom": {
+              "legend": false,
+              "tooltip": false,
+              "viz": false
+            },
+            "lineInterpolation": "stepBefore",
+            "lineWidth": 6,
+            "pointSize": 1,
+            "scaleDistribution": {
+              "type": "linear"
+            },
+            "showPoints": "auto",
+            "spanNulls": false,
+            "stacking": {
+              "group": "A",
+              "mode": "none"
+            },
+            "thresholdsStyle": {
+              "mode": "off"
+            }
+          },
+          "decimals": 0,
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "none"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 16
+      },
+      "id": 33,
+      "options": {
+        "legend": {
+          "calcs": [],
+          "displayMode": "list",
+          "placement": "bottom",
+          "showLegend": false
+        },
+        "tooltip": {
+          "mode": "single",
+          "sort": "none"
+        }
+      },
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (\"SA\" - interval '3 hours') AS \"SA\", (SELECT COUNT(*) FROM public.\"RpaProjectLaunches\" WHERE \"SA\" BETWEEN \"StartedAt\" AND \"CompletedAt\") AS \"Workers\"\nFROM (SELECT \"StartedAt\" AS \"SA\", \"StartedAt\", \"CompletedAt\" FROM public.\"RpaProjectLaunches\" WHERE \"CompletedAt\" IS NOT null) AS \"Completed\"\nWHERE $__timeFilter(\"SA\" - interval '3 hours')\nGROUP BY \"SA\"\nORDER BY \"SA\" DESC",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Количество одновременно работающих роботов",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "fixedColor": "orange",
+            "mode": "fixed"
+          },
+          "mappings": [],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "dthms"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Не закончил"
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 16
+      },
+      "id": 38,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "area",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "auto"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS StartedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Общее время работы",
+      "transformations": [
+        {
+          "id": "groupBy",
+          "options": {
+            "fields": {
+              "Duration": {
+                "aggregations": [
+                  "sum"
+                ],
+                "operation": "aggregate"
+              },
+              "Project": {
+                "aggregations": [],
+                "operation": "groupby"
+              },
+              "Robot": {
+                "aggregations": []
+              }
+            }
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "sum"
+            ]
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "continuous-GrYlRd"
+          },
+          "mappings": [],
+          "max": 900,
+          "min": 0,
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "green",
+                "value": null
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 24
+      },
+      "id": 17,
+      "options": {
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "lastNotNull"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "showThresholdLabels": false,
+        "showThresholdMarkers": false
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\",\n(\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours')",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Среднее время выполнения по проектам",
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": true
+                  }
+                },
+                "fieldName": "Disabled"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Disabled": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Disabled": "",
+              "Duration": "",
+              "time": ""
+            }
+          }
+        },
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "Project"
+            ]
+          }
+        },
+        {
+          "id": "reduce",
+          "options": {
+            "includeTimeField": false,
+            "mode": "reduceFields",
+            "reducers": [
+              "mean"
+            ]
+          }
+        }
+      ],
+      "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
             "mode": "palette-classic"
           },
           "custom": {
@@ -301,7 +1163,7 @@
         "h": 16,
         "w": 6,
         "x": 12,
-        "y": 0
+        "y": 24
       },
       "id": 27,
       "options": {
@@ -510,7 +1372,7 @@
         "h": 8,
         "w": 6,
         "x": 18,
-        "y": 0
+        "y": 24
       },
       "id": 18,
       "options": {
@@ -619,821 +1481,6 @@
         }
       ],
       "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_LTOOLS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "palette-classic"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "fillOpacity": 80,
-            "gradientMode": "none",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineWidth": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 8
-      },
-      "id": 16,
-      "options": {
-        "barRadius": 0.15,
-        "barWidth": 0.69,
-        "fullHighlight": false,
-        "groupWidth": 0.7,
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": true
-        },
-        "orientation": "auto",
-        "showValue": "auto",
-        "stacking": "normal",
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        },
-        "xTickLabelRotation": 0,
-        "xTickLabelSpacing": 200
-      },
-      "pluginVersion": "9.4.7",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\",\n(\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours')",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Время выполнения по проектам",
-      "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": true
-                  }
-                },
-                "fieldName": "Disabled"
-              }
-            ],
-            "match": "any",
-            "type": "exclude"
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Disabled": true,
-              "Duration": false
-            },
-            "indexByName": {},
-            "renameByName": {
-              "Disabled": "",
-              "Duration": "",
-              "time": ""
-            }
-          }
-        },
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "Project"
-            ]
-          }
-        }
-      ],
-      "type": "barchart"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_LTOOLS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "mappings": [],
-          "noValue": "Все запуски были успешны или еще не завершились",
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "red",
-                "value": null
-              }
-            ]
-          }
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 6,
-        "x": 18,
-        "y": 8
-      },
-      "id": 19,
-      "options": {
-        "colorMode": "value",
-        "graphMode": "none",
-        "justifyMode": "auto",
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "count"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "textMode": "value_and_name"
-      },
-      "pluginVersion": "9.4.7",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\", \"Success\" AS \".\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours') AND \"Success\" != true",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Неуспешное выполнение по проектам",
-      "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": true
-                  }
-                },
-                "fieldName": "Disabled"
-              }
-            ],
-            "match": "any",
-            "type": "exclude"
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Disabled": true,
-              "Project": false,
-              "Success": false,
-              "time": true
-            },
-            "indexByName": {},
-            "renameByName": {
-              "Disabled": "",
-              "Duration": "",
-              "OK": "",
-              "Success": "",
-              "time": ""
-            }
-          }
-        },
-        {
-          "id": "convertFieldType",
-          "options": {
-            "conversions": [
-              {
-                "destinationType": "number",
-                "targetField": "."
-              }
-            ],
-            "fields": {}
-          }
-        },
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "Project"
-            ]
-          }
-        }
-      ],
-      "type": "stat"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_LTOOLS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd",
-            "seriesBy": "last"
-          },
-          "custom": {
-            "axisCenteredZero": false,
-            "axisColorMode": "text",
-            "axisLabel": "",
-            "axisPlacement": "auto",
-            "barAlignment": 0,
-            "drawStyle": "bars",
-            "fillOpacity": 0,
-            "gradientMode": "scheme",
-            "hideFrom": {
-              "legend": false,
-              "tooltip": false,
-              "viz": false
-            },
-            "lineInterpolation": "stepBefore",
-            "lineWidth": 6,
-            "pointSize": 1,
-            "scaleDistribution": {
-              "type": "linear"
-            },
-            "showPoints": "auto",
-            "spanNulls": false,
-            "stacking": {
-              "group": "A",
-              "mode": "none"
-            },
-            "thresholdsStyle": {
-              "mode": "off"
-            }
-          },
-          "decimals": 0,
-          "mappings": [],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "none"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 16
-      },
-      "id": 33,
-      "options": {
-        "legend": {
-          "calcs": [],
-          "displayMode": "list",
-          "placement": "bottom",
-          "showLegend": false
-        },
-        "tooltip": {
-          "mode": "single",
-          "sort": "none"
-        }
-      },
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT (\"SA\" - interval '3 hours') AS \"SA\", (SELECT COUNT(*) FROM public.\"RpaProjectLaunches\" WHERE \"SA\" BETWEEN \"StartedAt\" AND \"CompletedAt\") AS \"Workers\"\nFROM (SELECT \"StartedAt\" AS \"SA\", \"StartedAt\", \"CompletedAt\" FROM public.\"RpaProjectLaunches\" WHERE \"CompletedAt\" IS NOT null) AS \"Completed\"\nWHERE $__timeFilter(\"SA\" - interval '3 hours')\nGROUP BY \"SA\"\nORDER BY \"SA\" DESC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Количество одновременно работающих роботов",
-      "type": "timeseries"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_LTOOLS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "thresholds"
-          },
-          "custom": {
-            "align": "auto",
-            "cellOptions": {
-              "type": "color-text"
-            },
-            "filterable": true,
-            "inspect": false
-          },
-          "mappings": [
-            {
-              "options": {
-                "false": {
-                  "color": "red",
-                  "index": 1,
-                  "text": "Не успешно"
-                },
-                "true": {
-                  "color": "green",
-                  "index": 0,
-                  "text": "Успешно"
-                }
-              },
-              "type": "value"
-            },
-            {
-              "options": {
-                "match": "null",
-                "result": {
-                  "color": "yellow",
-                  "index": 2
-                }
-              },
-              "type": "special"
-            }
-          ],
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "text",
-                "value": null
-              },
-              {
-                "color": "text",
-                "value": 0
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": [
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Duration"
-            },
-            "properties": [
-              {
-                "id": "custom.cellOptions",
-                "value": {
-                  "type": "gauge"
-                }
-              },
-              {
-                "id": "custom.width",
-                "value": 271
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Duration"
-            },
-            "properties": [
-              {
-                "id": "unit",
-                "value": "s"
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Success"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "thresholds"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "startedat"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 171
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Project"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 116
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Robot"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 86
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Duration"
-            },
-            "properties": [
-              {
-                "id": "color",
-                "value": {
-                  "mode": "continuous-GrYlRd"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Duration"
-            },
-            "properties": [
-              {
-                "id": "mappings",
-                "value": [
-                  {
-                    "options": {
-                      "Не закончил": {
-                        "index": 0,
-                        "text": "-"
-                      }
-                    },
-                    "type": "value"
-                  }
-                ]
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Assign"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 125
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Assignment"
-            },
-            "properties": [
-              {
-                "id": "custom.width",
-                "value": 118
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Assignment"
-            },
-            "properties": [
-              {
-                "id": "noValue",
-                "value": "Manual"
-              },
-              {
-                "id": "color",
-                "value": {
-                  "fixedColor": "text",
-                  "mode": "fixed"
-                }
-              }
-            ]
-          },
-          {
-            "matcher": {
-              "id": "byName",
-              "options": "Success"
-            },
-            "properties": [
-              {
-                "id": "noValue",
-                "value": "Не закончил"
-              }
-            ]
-          }
-        ]
-      },
-      "gridPos": {
-        "h": 24,
-        "w": 12,
-        "x": 12,
-        "y": 16
-      },
-      "id": 31,
-      "options": {
-        "footer": {
-          "countRows": false,
-          "enablePagination": false,
-          "fields": "",
-          "reducer": [
-            "sum"
-          ],
-          "show": false
-        },
-        "showHeader": true,
-        "sortBy": []
-      },
-      "pluginVersion": "9.4.7",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS StartedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "История запусков",
-      "transformations": [],
-      "type": "table"
-    },
-    {
-      "datasource": {
-        "type": "postgres",
-        "uid": "${DS_LTOOLS}"
-      },
-      "fieldConfig": {
-        "defaults": {
-          "color": {
-            "mode": "continuous-GrYlRd"
-          },
-          "mappings": [],
-          "max": 900,
-          "min": 0,
-          "thresholds": {
-            "mode": "absolute",
-            "steps": [
-              {
-                "color": "green",
-                "value": null
-              }
-            ]
-          },
-          "unit": "s"
-        },
-        "overrides": []
-      },
-      "gridPos": {
-        "h": 8,
-        "w": 12,
-        "x": 0,
-        "y": 24
-      },
-      "id": 17,
-      "options": {
-        "orientation": "auto",
-        "reduceOptions": {
-          "calcs": [
-            "lastNotNull"
-          ],
-          "fields": "",
-          "values": false
-        },
-        "showThresholdLabels": false,
-        "showThresholdMarkers": false
-      },
-      "pluginVersion": "9.4.7",
-      "targets": [
-        {
-          "datasource": {
-            "type": "postgres",
-            "uid": "${DS_LTOOLS}"
-          },
-          "editorMode": "code",
-          "format": "table",
-          "rawQuery": true,
-          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\",\n(\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours')",
-          "refId": "A",
-          "sql": {
-            "columns": [
-              {
-                "parameters": [],
-                "type": "function"
-              }
-            ],
-            "groupBy": [
-              {
-                "property": {
-                  "type": "string"
-                },
-                "type": "groupBy"
-              }
-            ],
-            "limit": 50
-          }
-        }
-      ],
-      "title": "Среднее время выполнения по проектам",
-      "transformations": [
-        {
-          "id": "filterByValue",
-          "options": {
-            "filters": [
-              {
-                "config": {
-                  "id": "equal",
-                  "options": {
-                    "value": true
-                  }
-                },
-                "fieldName": "Disabled"
-              }
-            ],
-            "match": "any",
-            "type": "exclude"
-          }
-        },
-        {
-          "id": "organize",
-          "options": {
-            "excludeByName": {
-              "Disabled": true
-            },
-            "indexByName": {},
-            "renameByName": {
-              "Disabled": "",
-              "Duration": "",
-              "time": ""
-            }
-          }
-        },
-        {
-          "id": "partitionByValues",
-          "options": {
-            "fields": [
-              "Project"
-            ]
-          }
-        },
-        {
-          "id": "reduce",
-          "options": {
-            "includeTimeField": false,
-            "mode": "reduceFields",
-            "reducers": [
-              "mean"
-            ]
-          }
-        }
-      ],
-      "type": "gauge"
     },
     {
       "datasource": {
@@ -1614,6 +1661,421 @@
       ],
       "title": "Количество записей в OrchEvents",
       "type": "gauge"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "mappings": [],
+          "noValue": "Все запуски были успешны или еще не завершились",
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "red",
+                "value": null
+              }
+            ]
+          }
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 6,
+        "x": 18,
+        "y": 32
+      },
+      "id": 19,
+      "options": {
+        "colorMode": "value",
+        "graphMode": "none",
+        "justifyMode": "auto",
+        "orientation": "auto",
+        "reduceOptions": {
+          "calcs": [
+            "count"
+          ],
+          "fields": "",
+          "values": false
+        },
+        "textMode": "value_and_name"
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT (\"StartedAt\" - interval '3 hours') AS \"time\", \"Success\" AS \".\",\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\")),\n(SELECT \"Disabled\" FROM public.\"RpaProjects\" WHERE (\"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"))\nFROM\n  public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter(\"StartedAt\" - interval '3 hours') AND \"Success\" != true",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "Неуспешное выполнение по проектам",
+      "transformations": [
+        {
+          "id": "filterByValue",
+          "options": {
+            "filters": [
+              {
+                "config": {
+                  "id": "equal",
+                  "options": {
+                    "value": true
+                  }
+                },
+                "fieldName": "Disabled"
+              }
+            ],
+            "match": "any",
+            "type": "exclude"
+          }
+        },
+        {
+          "id": "organize",
+          "options": {
+            "excludeByName": {
+              "Disabled": true,
+              "Project": false,
+              "Success": false,
+              "time": true
+            },
+            "indexByName": {},
+            "renameByName": {
+              "Disabled": "",
+              "Duration": "",
+              "OK": "",
+              "Success": "",
+              "time": ""
+            }
+          }
+        },
+        {
+          "id": "convertFieldType",
+          "options": {
+            "conversions": [
+              {
+                "destinationType": "number",
+                "targetField": "."
+              }
+            ],
+            "fields": {}
+          }
+        },
+        {
+          "id": "partitionByValues",
+          "options": {
+            "fields": [
+              "Project"
+            ]
+          }
+        }
+      ],
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "postgres",
+        "uid": "${DS_LTOOLS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "color": {
+            "mode": "thresholds"
+          },
+          "custom": {
+            "align": "auto",
+            "cellOptions": {
+              "type": "color-text"
+            },
+            "filterable": true,
+            "inspect": false
+          },
+          "mappings": [
+            {
+              "options": {
+                "false": {
+                  "color": "red",
+                  "index": 1,
+                  "text": "Не успешно"
+                },
+                "true": {
+                  "color": "green",
+                  "index": 0,
+                  "text": "Успешно"
+                }
+              },
+              "type": "value"
+            },
+            {
+              "options": {
+                "match": "null",
+                "result": {
+                  "color": "yellow",
+                  "index": 2
+                }
+              },
+              "type": "special"
+            }
+          ],
+          "thresholds": {
+            "mode": "absolute",
+            "steps": [
+              {
+                "color": "text",
+                "value": null
+              },
+              {
+                "color": "text",
+                "value": 0
+              }
+            ]
+          },
+          "unit": "s"
+        },
+        "overrides": [
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "custom.cellOptions",
+                "value": {
+                  "type": "gauge"
+                }
+              },
+              {
+                "id": "custom.width",
+                "value": 830
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "unit",
+                "value": "s"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "thresholds"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Project"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 116
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Robot"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 126
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "mappings",
+                "value": [
+                  {
+                    "options": {
+                      "Не закончил": {
+                        "index": 0,
+                        "text": "-"
+                      }
+                    },
+                    "type": "value"
+                  }
+                ]
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assignment"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 150
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Assignment"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Manual"
+              },
+              {
+                "id": "color",
+                "value": {
+                  "fixedColor": "text",
+                  "mode": "fixed"
+                }
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Success"
+            },
+            "properties": [
+              {
+                "id": "noValue",
+                "value": "Не закончил"
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "startedat"
+            },
+            "properties": [
+              {
+                "id": "custom.width",
+                "value": 205
+              }
+            ]
+          },
+          {
+            "matcher": {
+              "id": "byName",
+              "options": "Duration"
+            },
+            "properties": [
+              {
+                "id": "color",
+                "value": {
+                  "mode": "continuous-GrYlRd"
+                }
+              }
+            ]
+          }
+        ]
+      },
+      "gridPos": {
+        "h": 10,
+        "w": 24,
+        "x": 0,
+        "y": 40
+      },
+      "id": 31,
+      "options": {
+        "footer": {
+          "countRows": false,
+          "enablePagination": false,
+          "fields": "",
+          "reducer": [
+            "sum"
+          ],
+          "show": false
+        },
+        "showHeader": true,
+        "sortBy": []
+      },
+      "pluginVersion": "9.4.7",
+      "targets": [
+        {
+          "datasource": {
+            "type": "postgres",
+            "uid": "${DS_LTOOLS}"
+          },
+          "editorMode": "code",
+          "format": "table",
+          "rawQuery": true,
+          "rawSql": "SELECT\n(SELECT \"Name\" AS \"Robot\" FROM public.\"Robots\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"RobotId\"),\n(SELECT \"Name\" AS \"Project\" FROM public.\"RpaProjects\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"ProjectId\"),\n(SELECT \"Name\" AS \"Assignment\" FROM public.\"Assignments\" WHERE \"Id\" = public.\"RpaProjectLaunches\".\"AssignmentId\"),\n(\"StartedAt\" - interval '3 hours') AS StartedAt, (\n  abs( extract( second from (\"CompletedAt\" - \"StartedAt\") )\n + extract( minute from (\"CompletedAt\" - \"StartedAt\") ) * 60\n + extract( hour from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60\n + extract( day from (\"CompletedAt\" - \"StartedAt\") ) * 60 * 60 * 24)\n) AS \"Duration\", \"Success\"\nFROM public.\"RpaProjectLaunches\"\nWHERE\n  $__timeFilter((\"StartedAt\" - interval '3 hours'))\nORDER BY \"StartedAt\" DESC",
+          "refId": "A",
+          "sql": {
+            "columns": [
+              {
+                "parameters": [],
+                "type": "function"
+              }
+            ],
+            "groupBy": [
+              {
+                "property": {
+                  "type": "string"
+                },
+                "type": "groupBy"
+              }
+            ],
+            "limit": 50
+          }
+        }
+      ],
+      "title": "История запусков",
+      "transformations": [],
+      "type": "table"
     }
   ],
   "refresh": "30s",
@@ -1625,13 +2087,13 @@
     "list": []
   },
   "time": {
-    "from": "now-3h",
+    "from": "now-6h",
     "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",
   "title": "Orchestrator",
   "uid": "YpEtaXEVz",
-  "version": 64,
+  "version": 70,
   "weekStart": ""
 }
